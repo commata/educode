@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:educode;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+  flyway:
+    enabled: false
+
+app:
+  jwt:
+    secret: ZmFrZWZha2VmYWtlZmFrZWZha2VmYWtlZmFrZWZha2VmYWtlZmFrZQ==
+    access-token-expiry-seconds: 86400
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+  judge0:
+    base-url: http://localhost:2358
+    poll-interval-millis: 10
+    max-poll-count: 3
+    default-run-time-limit: 2000
+    default-run-memory-limit: 256000
+    language-map:
+      java: 62
+      python: 71
