@@ -37,21 +37,39 @@ public class SubmissionService {
 
     public SubmissionDtos.RunResponse run(Long studentId, UserRole role, SubmissionDtos.RunRequest request) {
         requireStudent(role);
-        Judge0Dtos.SubmissionResult result = judge0Client.execute(
-                request.language(),
-                request.code(),
-                request.customInput() == null ? "" : request.customInput(),
-                judge0Properties.getDefaultRunTimeLimit(),
-                Math.max(1, judge0Properties.getDefaultRunMemoryLimit() / 1024)
-        );
-        SubmissionStatus mapped = judge0StatusMapper.map(result, true);
-        return new SubmissionDtos.RunResponse(
-                result.stdout(),
-                result.stderr(),
-                result.compileOutput(),
-                result.status() != null ? result.status().description() : "UNKNOWN",
-                mapped
-        );
+        try {
+            Judge0Dtos.SubmissionResult result = judge0Client.execute(
+                    request.language(),
+                    request.code(),
+                    request.customInput() == null ? "" : request.customInput(),
+                    judge0Properties.getDefaultRunTimeLimit(),
+                    Math.max(1, judge0Properties.getDefaultRunMemoryLimit() / 1024)
+            );
+            SubmissionStatus mapped = judge0StatusMapper.map(result, true);
+            return new SubmissionDtos.RunResponse(
+                    result.stdout(),
+                    result.stderr(),
+                    result.compileOutput(),
+                    result.status() != null ? result.status().description() : "UNKNOWN",
+                    mapped
+            );
+        } catch (ApiException e) {
+            return new SubmissionDtos.RunResponse(
+                    null,
+                    e.getMessage(),
+                    null,
+                    "ERROR",
+                    SubmissionStatus.ERROR
+            );
+        } catch (RuntimeException e) {
+            return new SubmissionDtos.RunResponse(
+                    null,
+                    "Code execution failed",
+                    null,
+                    "ERROR",
+                    SubmissionStatus.ERROR
+            );
+        }
     }
 
     @Transactional
@@ -62,6 +80,7 @@ public class SubmissionService {
             throw new ApiException(ErrorCode.ASSIGNMENT_CLOSED);
         }
         User student = userService.getUser(studentId);
+        int totalCases = assignment.getProblem().getTestCases().size();
 
         Submission submission = submissionRepository.save(Submission.builder()
                 .student(student)
@@ -70,7 +89,7 @@ public class SubmissionService {
                 .language(request.language())
                 .status(SubmissionStatus.ERROR)
                 .passedCases(0)
-                .totalCases(assignment.getProblem().getTestCases().size())
+                .totalCases(totalCases)
                 .errorMessage(null)
                 .build());
 
@@ -78,37 +97,46 @@ public class SubmissionService {
         String errorMessage = null;
         SubmissionStatus finalStatus = SubmissionStatus.PASS;
 
-        for (var testCase : assignment.getProblem().getTestCases()) {
-            Judge0Dtos.SubmissionResult result = judge0Client.execute(
-                    request.language(),
-                    request.code(),
-                    testCase.getInputData(),
-                    assignment.getProblem().getTimeLimit(),
-                    assignment.getProblem().getMemoryLimit()
-            );
+        try {
+            for (var testCase : assignment.getProblem().getTestCases()) {
+                Judge0Dtos.SubmissionResult result = judge0Client.execute(
+                        request.language(),
+                        request.code(),
+                        testCase.getInputData(),
+                        assignment.getProblem().getTimeLimit(),
+                        assignment.getProblem().getMemoryLimit()
+                );
 
-            String actual = OutputNormalizer.normalize(result.stdout());
-            String expected = OutputNormalizer.normalize(testCase.getExpectedOutput());
-            boolean matched = actual.equals(expected);
-            SubmissionStatus caseStatus = judge0StatusMapper.map(result, matched);
+                String actual = OutputNormalizer.normalize(result.stdout());
+                String expected = OutputNormalizer.normalize(testCase.getExpectedOutput());
+                boolean matched = actual.equals(expected);
+                SubmissionStatus caseStatus = judge0StatusMapper.map(result, matched);
 
-            if (caseStatus == SubmissionStatus.PASS) {
-                passed++;
-            } else {
+                if (caseStatus == SubmissionStatus.PASS) {
+                    passed++;
+                    continue;
+                }
+
                 finalStatus = caseStatus == SubmissionStatus.FAIL ? SubmissionStatus.FAIL : caseStatus;
                 errorMessage = judge0StatusMapper.extractErrorMessage(result);
                 if (finalStatus != SubmissionStatus.FAIL && (errorMessage == null || errorMessage.isBlank())) {
-                    errorMessage = result.status() != null ? result.status().description() : "실행 오류";
+                    errorMessage = result.status() != null ? result.status().description() : "Execution failed";
                 }
                 break;
             }
+
+            if (finalStatus == SubmissionStatus.PASS && passed != totalCases) {
+                finalStatus = SubmissionStatus.FAIL;
+            }
+        } catch (ApiException e) {
+            finalStatus = SubmissionStatus.ERROR;
+            errorMessage = (e.getMessage() == null || e.getMessage().isBlank()) ? "Judge execution failed" : e.getMessage();
+        } catch (RuntimeException e) {
+            finalStatus = SubmissionStatus.ERROR;
+            errorMessage = "Submission evaluation failed";
         }
 
-        if (finalStatus == SubmissionStatus.PASS && passed != assignment.getProblem().getTestCases().size()) {
-            finalStatus = SubmissionStatus.FAIL;
-        }
-
-        submission.complete(finalStatus, passed, assignment.getProblem().getTestCases().size(), errorMessage);
+        submission.complete(finalStatus, passed, totalCases, errorMessage);
         return new SubmissionDtos.SubmitResponse(
                 submission.getId(),
                 submission.getStatus(),

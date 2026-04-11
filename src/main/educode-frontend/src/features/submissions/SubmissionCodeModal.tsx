@@ -49,11 +49,11 @@ export function SubmissionCodeModal({
 
           {tab === 'code' ? (
             <pre className="max-h-[50vh] overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-slate-100">
-              {submission.sourceCode}
+              {submission.code}
             </pre>
           ) : (
             <pre className="max-h-[50vh] overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-slate-100">
-              {submission.systemErrorLog || submission.stderr || submission.compileError || '-'}
+              {submission.errorMessage || '-'}
             </pre>
           )}
         </div>

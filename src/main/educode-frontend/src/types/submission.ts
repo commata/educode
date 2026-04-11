@@ -4,43 +4,44 @@ export type JudgeStatus = 'PASS' | 'FAIL' | 'ERROR' | 'RUNNING' | 'PENDING' | 'N
 
 export interface ExecutionResult {
   status: JudgeStatus;
-  passedCount: number;
-  totalCount: number;
   stdout?: string | null;
   stderr?: string | null;
-  compileError?: string | null;
-  systemErrorLog?: string | null;
-  timeMs?: number | null;
-  memoryKb?: number | null;
+  compileOutput?: string | null;
+  judgeStatus: string;
 }
 
 export interface RunCodeRequest {
-  assignmentId: number;
   language: EditorLanguage;
-  sourceCode: string;
-  customInput: string;
+  code: string;
+  customInput?: string;
 }
 
 export interface SubmitCodeRequest {
   assignmentId: number;
   language: EditorLanguage;
-  sourceCode: string;
+  code: string;
+}
+
+export interface SubmitResult {
+  submissionId: number;
+  assignmentId: number;
+  status: JudgeStatus;
+  passedCases: number;
+  totalCases: number;
+  errorMessage?: string | null;
 }
 
 export interface Submission {
-  id: number;
+  submissionId: number;
   assignmentId: number;
   studentId: number;
   studentName: string;
   language: EditorLanguage;
-  sourceCode: string;
+  code: string;
   status: JudgeStatus;
-  passedCount: number;
-  totalCount: number;
-  stdout?: string | null;
-  stderr?: string | null;
-  compileError?: string | null;
-  systemErrorLog?: string | null;
+  passedCases: number;
+  totalCases: number;
+  errorMessage?: string | null;
   submittedAt: string;
 }
 
@@ -48,6 +49,7 @@ export interface SubmissionStatusItem {
   submissionId: number | null;
   studentId: number;
   studentName: string;
+  submitted: boolean;
   status: JudgeStatus;
   resultSummary: string;
   submittedAt: string | null;

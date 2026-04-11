@@ -4,6 +4,12 @@ export interface TestCase {
   isHidden: boolean;
 }
 
+export interface TestCaseRequest {
+  inputData: string;
+  expectedOutput: string;
+  isHidden: boolean;
+}
+
 export interface Problem {
   id: number;
   title: string;
@@ -17,10 +23,10 @@ export interface Problem {
 
 export interface CreateProblemRequest {
   title: string;
-  descriptionMarkdown: string;
-  timeLimitMs: number;
-  memoryLimitMb: number;
-  testCases: TestCase[];
+  content: string;
+  timeLimit: number;
+  memoryLimit: number;
+  testCases: TestCaseRequest[];
 }
 
 export type UpdateProblemRequest = CreateProblemRequest;

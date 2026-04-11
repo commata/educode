@@ -16,12 +16,12 @@ interface ProblemFormProps {
 
 const initialValues: ProblemFormValues = {
   title: '',
-  descriptionMarkdown: '',
-  timeLimitMs: 2000,
-  memoryLimitMb: 256,
+  content: '',
+  timeLimit: 2000,
+  memoryLimit: 256,
   testCases: [
     {
-      input: '',
+      inputData: '',
       expectedOutput: '',
       isHidden: false,
     },
@@ -51,36 +51,36 @@ export function ProblemForm({
         onSubmit={handleSubmit(onSubmit)}
       >
         <Input
-          label="문제 제목"
-          placeholder="예: 두 수의 합"
+          label="Title"
+          placeholder="Enter a problem title"
           {...register('title')}
           error={errors.title?.message}
         />
         <Textarea
-          label="문제 본문 (Markdown)"
-          placeholder="# 문제 설명"
+          label="Problem Content (Markdown)"
+          placeholder="# Describe the problem"
           className="min-h-[220px]"
-          {...register('descriptionMarkdown')}
-          error={errors.descriptionMarkdown?.message}
+          {...register('content')}
+          error={errors.content?.message}
         />
         <div className="grid gap-4 md:grid-cols-2">
           <Input
-            label="제한시간 (ms)"
+            label="Time Limit (ms)"
             type="number"
-            {...register('timeLimitMs')}
-            error={errors.timeLimitMs?.message}
+            {...register('timeLimit')}
+            error={errors.timeLimit?.message}
           />
           <Input
-            label="메모리 제한 (MB)"
+            label="Memory Limit (MB)"
             type="number"
-            {...register('memoryLimitMb')}
-            error={errors.memoryLimitMb?.message}
+            {...register('memoryLimit')}
+            error={errors.memoryLimit?.message}
           />
         </div>
         <TestCaseFieldArray />
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? '생성 중...' : '문제 생성'}
+            {isSubmitting ? 'Saving...' : 'Save Problem'}
           </Button>
         </div>
       </form>

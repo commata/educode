@@ -9,20 +9,32 @@ export function ProtectedRoute() {
   const token = useAuthStore((state) => state.accessToken);
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
-  const { data, isLoading } = useMeQuery();
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+
+  const { data, isLoading, isError } = useMeQuery();
 
   useEffect(() => {
     if (data && (!user || user.id !== data.id)) {
       setUser(data);
     }
-  }, [data, setUser, user]);
+  }, [data, user, setUser]);
+
+  useEffect(() => {
+    if (isError) {
+      clearAuth();
+    }
+  }, [isError, clearAuth]);
 
   if (!token) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  if (isLoading && !user) {
+  if (isLoading) {
     return <LoadingSpinner label="사용자 정보를 확인하는 중..." />;
+  }
+
+  if (isError) {
+    return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;

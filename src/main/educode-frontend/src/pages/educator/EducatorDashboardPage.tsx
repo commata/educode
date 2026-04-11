@@ -59,11 +59,12 @@ export function EducatorDashboardPage() {
 
   const handleDistributeAssignment = async (values: AssignmentDistributeValues) => {
     if (!selectedClassroomId) return;
+
     try {
       setActionError('');
       await createAssignmentMutation.mutateAsync({
         problemId: values.problemId,
-        dueAt: new Date(values.dueAt).toISOString(),
+        deadline: values.dueAt,
       });
       setSelectedClassroomId(null);
     } catch (error) {
@@ -137,7 +138,7 @@ export function EducatorDashboardPage() {
                   <tr key={assignment.id} className="border-t border-slate-200">
                     <td className="px-4 py-3">{assignment.classroomName}</td>
                     <td className="px-4 py-3">{assignment.problemTitle}</td>
-                    <td className="px-4 py-3">{formatDateTime(assignment.dueAt)}</td>
+                    <td className="px-4 py-3">{formatDateTime(assignment.deadline)}</td>
                     <td className="px-4 py-3">
                       <Link to={`/assignments/${assignment.id}/status`}>
                         <Button variant="secondary">제출 현황 바로가기</Button>

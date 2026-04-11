@@ -44,24 +44,27 @@ export function SignupPage() {
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <Input
             label="이름"
-            {...register('name')}
             placeholder="이름을 입력하세요"
+            autoComplete="name"
+            {...register('name')}
             error={errors.name?.message}
           />
 
           <Input
             label="이메일"
             type="email"
-            {...register('email')}
             placeholder="example@email.com"
+            autoComplete="email"
+            {...register('email')}
             error={errors.email?.message}
           />
 
           <Input
             label="비밀번호"
             type="password"
-            {...register('password')}
             placeholder="비밀번호를 입력하세요"
+            autoComplete="new-password"
+            {...register('password')}
             error={errors.password?.message}
           />
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,7 +12,6 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const setAuth = useAuthStore((state) => state.setAuth);
-  const user = useAuthStore((state) => state.user);
   const [submitError, setSubmitError] = useState('');
   const loginMutation = useLoginMutation();
 
@@ -28,18 +27,11 @@ export function LoginPage() {
     },
   });
 
-  useEffect(() => {
-    if (user) {
-      navigate(user.role === 'EDUCATOR' ? '/educator/dashboard' : '/student/dashboard', {
-        replace: true,
-      });
-    }
-  }, [navigate, user]);
-
   const onSubmit = async (values: LoginValues) => {
     try {
       setSubmitError('');
       const response = await loginMutation.mutateAsync(values);
+
       setAuth({
         accessToken: response.accessToken,
         user: response.user,
@@ -71,6 +63,7 @@ export function LoginPage() {
             label="이메일"
             type="email"
             placeholder="you@example.com"
+            autoComplete="email"
             {...register('email')}
             error={errors.email?.message}
           />
@@ -78,6 +71,7 @@ export function LoginPage() {
             label="비밀번호"
             type="password"
             placeholder="비밀번호 입력"
+            autoComplete="current-password"
             {...register('password')}
             error={errors.password?.message}
           />

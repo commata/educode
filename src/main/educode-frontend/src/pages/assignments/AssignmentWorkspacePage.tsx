@@ -15,7 +15,7 @@ import { RunResultPanel } from '@/features/workspace/RunResultPanel';
 import { SubmitResultModal } from '@/features/workspace/SubmitResultModal';
 import { Button } from '@/shared/ui/Button';
 import { formatDateTime } from '@/shared/lib/date';
-import type { ExecutionResult, Submission } from '@/types/submission';
+import type { ExecutionResult, SubmitResult } from '@/types/submission';
 
 export function AssignmentWorkspacePage() {
   const params = useParams();
@@ -29,7 +29,7 @@ export function AssignmentWorkspacePage() {
   const [sourceCode, setSourceCode] = useState(DEFAULT_CODE_BY_LANGUAGE.python);
   const [customInput, setCustomInput] = useState('');
   const [runResult, setRunResult] = useState<ExecutionResult | null>(null);
-  const [submitResult, setSubmitResult] = useState<Submission | null>(null);
+  const [submitResult, setSubmitResult] = useState<SubmitResult | null>(null);
   const [isSubmitModalOpen, setSubmitModalOpen] = useState(false);
   const [actionError, setActionError] = useState('');
 
@@ -38,7 +38,7 @@ export function AssignmentWorkspacePage() {
   }, [language]);
 
   const publicExamples = useMemo(
-    () => assignmentQuery.data?.problem.testCases.filter((item) => !item.isHidden) ?? [],
+    () => assignmentQuery.data?.visibleTestCases ?? [],
     [assignmentQuery.data],
   );
 
@@ -63,9 +63,8 @@ export function AssignmentWorkspacePage() {
     try {
       setActionError('');
       const result = await runMutation.mutateAsync({
-        assignmentId: assignment.id,
         language,
-        sourceCode,
+        code: sourceCode,
         customInput,
       });
       setRunResult(result);
@@ -80,7 +79,7 @@ export function AssignmentWorkspacePage() {
       const result = await submitMutation.mutateAsync({
         assignmentId: assignment.id,
         language,
-        sourceCode,
+        code: sourceCode,
       });
       setSubmitResult(result);
       setSubmitModalOpen(true);
@@ -98,7 +97,7 @@ export function AssignmentWorkspacePage() {
           </Link>
           <h1 className="mt-1 text-2xl font-bold text-slate-900">{assignment.problemTitle}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            마감일: {formatDateTime(assignment.dueAt)}
+            마감일: {formatDateTime(assignment.deadline)}
           </p>
         </div>
         <div className="flex gap-2">
@@ -118,15 +117,15 @@ export function AssignmentWorkspacePage() {
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
             <h2 className="text-lg font-semibold text-slate-900">문제 설명</h2>
             <div className="prose mt-4 max-w-none text-sm text-slate-700">
-              <ReactMarkdown>{assignment.problem.descriptionMarkdown}</ReactMarkdown>
+             <ReactMarkdown>{assignment.descriptionMarkdown}</ReactMarkdown>
             </div>
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
             <h2 className="text-lg font-semibold text-slate-900">제한 사항</h2>
             <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              <li>시간 제한: {assignment.problem.timeLimitMs} ms</li>
-              <li>메모리 제한: {assignment.problem.memoryLimitMb} MB</li>
+              <li>시간 제한: {assignment.timeLimitMs} ms</li>
+              <li>메모리 제한: {assignment.memoryLimitMb} MB</li>
             </ul>
           </section>
 

@@ -14,13 +14,13 @@ export function AssignmentCard({ assignment }: { assignment: Assignment }) {
         </div>
         <StatusBadge status={assignment.mySubmissionStatus ?? 'NOT_SUBMITTED'} />
       </div>
-      <p className="mt-4 text-sm text-slate-600">마감일: {formatDate(assignment.dueAt)}</p>
+      <p className="mt-4 text-sm text-slate-600">Deadline: {formatDate(assignment.deadline)}</p>
       <div className="mt-5 flex gap-2">
         <Link to={`/assignments/${assignment.id}/workspace`}>
-          <Button>코딩하러 가기</Button>
+          <Button>Open Workspace</Button>
         </Link>
         <Link to={`/classrooms/${assignment.classroomId}`}>
-          <Button variant="secondary">학습방 보기</Button>
+          <Button variant="secondary">View Classroom</Button>
         </Link>
       </div>
     </article>

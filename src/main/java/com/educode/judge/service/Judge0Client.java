@@ -5,6 +5,7 @@ import com.educode.common.exception.ErrorCode;
 import com.educode.config.Judge0Properties;
 import com.educode.judge.dto.Judge0Dtos;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -31,7 +32,7 @@ public class Judge0Client {
         try {
             Judge0Dtos.SubmissionTokenResponse tokenResponse = restClient.post()
                     .uri(properties.getBaseUrl() + "/submissions?base64_encoded=false&wait=false")
-                    .headers(this::addHeaders)
+                    .headers(headers -> addHeaders(headers, true))
                     .body(request)
                     .retrieve()
                     .body(Judge0Dtos.SubmissionTokenResponse.class);
@@ -44,7 +45,7 @@ public class Judge0Client {
                 sleep(properties.getPollIntervalMillis());
                 Judge0Dtos.SubmissionResult result = restClient.get()
                         .uri(properties.getBaseUrl() + "/submissions/" + tokenResponse.token() + "?base64_encoded=false")
-                        .headers(this::addHeaders)
+                        .headers(headers -> addHeaders(headers, false))
                         .retrieve()
                         .body(Judge0Dtos.SubmissionResult.class);
                 if (result != null && result.status() != null && result.status().id() != null && result.status().id() > 2) {
@@ -57,7 +58,11 @@ public class Judge0Client {
         }
     }
 
-    private void addHeaders(HttpHeaders headers) {
+    private void addHeaders(HttpHeaders headers, boolean includeJsonContentType) {
+        headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
+        if (includeJsonContentType) {
+            headers.setContentType(MediaType.APPLICATION_JSON);
+        }
         if (properties.getXAuthToken() != null && !properties.getXAuthToken().isBlank()) {
             headers.add("X-Auth-Token", properties.getXAuthToken());
         }

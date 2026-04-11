@@ -9,7 +9,6 @@ import {
 import { LoadingSpinner } from '@/shared/ui/LoadingSpinner';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { SubmissionCodeModal } from '@/features/submissions/SubmissionCodeModal';
-import type { JudgeStatus } from '@/types/submission';
 
 type FilterKey = 'ALL' | 'NOT_SUBMITTED' | 'WRONG_ANSWER';
 
@@ -103,6 +102,7 @@ function FilterButton({
 }) {
   return (
     <button
+      type="button"
       className={`rounded-xl px-4 py-2 text-sm font-medium ${
         active
           ? 'bg-slate-900 text-white'

@@ -3,13 +3,16 @@ import { camelizeKeys, snakeCaseKeys } from '@/shared/lib/case';
 import { useAuthStore } from '@/store/authStore';
 import type { ApiErrorResponse, ApiResponse } from '@/types/common';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: API_BASE_URL,
   timeout: 15_000,
 });
 
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -47,10 +50,10 @@ apiClient.interceptors.response.use(
     const responseData = camelizeKeys(error.response?.data) as
       | ApiResponse<Record<string, string> | null>
       | undefined;
+
     const message =
       responseData?.message ??
-      error.message ??
-      '요청 처리 중 오류가 발생했습니다.';
+      (status ? `요청 실패 (${status})` : '서버에 연결할 수 없습니다. 백엔드 실행과 API 주소를 확인하세요.');
 
     if (status === 401) {
       useAuthStore.getState().clearAuth();

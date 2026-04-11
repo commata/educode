@@ -6,14 +6,18 @@ import type {
   JoinClassroomRequest,
 } from '@/types/classroom';
 
+interface ClassroomListResponse {
+  classrooms: Classroom[];
+}
+
 export async function createClassroom(payload: CreateClassroomRequest) {
   const { data } = await apiClient.post<Classroom>('/api/classrooms', payload);
   return data;
 }
 
 export async function getMyClassrooms() {
-  const { data } = await apiClient.get<Classroom[]>('/api/classrooms/my');
-  return data;
+  const { data } = await apiClient.get<ClassroomListResponse>('/api/classrooms/my');
+  return data.classrooms;
 }
 
 export async function joinClassroom(payload: JoinClassroomRequest) {

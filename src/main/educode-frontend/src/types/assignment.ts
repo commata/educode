@@ -1,4 +1,3 @@
-import type { Problem } from '@/types/problem';
 import type { JudgeStatus } from '@/types/submission';
 
 export interface Assignment {
@@ -7,17 +6,31 @@ export interface Assignment {
   classroomName: string;
   problemId: number;
   problemTitle: string;
-  dueAt: string;
+  deadline: string;
   createdAt: string;
   mySubmissionStatus?: JudgeStatus;
   latestSubmissionId?: number | null;
 }
 
-export interface AssignmentDetail extends Assignment {
-  problem: Problem;
+export interface VisibleTestCase {
+  input: string;
+  expectedOutput: string;
+}
+
+export interface AssignmentDetail {
+  id: number;
+  classroomId: number;
+  classroomName: string;
+  problemId: number;
+  problemTitle: string;
+  descriptionMarkdown: string;
+  timeLimitMs: number;
+  memoryLimitMb: number;
+  deadline: string;
+  visibleTestCases: VisibleTestCase[];
 }
 
 export interface CreateAssignmentRequest {
   problemId: number;
-  dueAt: string;
+  deadline: string;
 }

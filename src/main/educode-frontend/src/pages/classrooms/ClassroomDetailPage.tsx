@@ -81,7 +81,7 @@ export function ClassroomDetailPage() {
                 {assignmentsQuery.data.map((assignment) => (
                   <tr key={assignment.id} className="border-t border-slate-200">
                     <td className="px-4 py-3">{assignment.problemTitle}</td>
-                    <td className="px-4 py-3">{formatDateTime(assignment.dueAt)}</td>
+                    <td className="px-4 py-3">{formatDateTime(assignment.deadline)}</td>
                     <td className="px-4 py-3">
                       {user?.role === 'EDUCATOR' ? (
                         <Link to={`/assignments/${assignment.id}/status`}>

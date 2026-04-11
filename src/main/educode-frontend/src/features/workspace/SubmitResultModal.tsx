@@ -1,10 +1,10 @@
-import type { Submission } from '@/types/submission';
+import type { SubmitResult } from '@/types/submission';
 import { Modal } from '@/shared/ui/Modal';
 import { StatusBadge } from '@/shared/ui/Badge';
 
 interface SubmitResultModalProps {
   isOpen: boolean;
-  submission: Submission | null;
+  submission: SubmitResult | null;
   onClose: () => void;
 }
 
@@ -14,21 +14,18 @@ export function SubmitResultModal({
   onClose,
 }: SubmitResultModalProps) {
   return (
-    <Modal isOpen={isOpen} title="제출 결과" onClose={onClose}>
+    <Modal isOpen={isOpen} title="Submit Result" onClose={onClose}>
       {!submission ? (
-        <p className="text-sm text-slate-500">제출 결과가 없습니다.</p>
+        <p className="text-sm text-slate-500">No submission result available.</p>
       ) : (
         <div className="space-y-4 text-sm">
           <div className="flex items-center gap-3">
             <StatusBadge status={submission.status} />
             <span className="text-slate-700">
-              {submission.passedCount} / {submission.totalCount} 케이스 통과
+              {submission.passedCases} / {submission.totalCases} cases passed
             </span>
           </div>
-          <ResultSection title="stdout" value={submission.stdout} />
-          <ResultSection title="stderr" value={submission.stderr} />
-          <ResultSection title="compile error" value={submission.compileError} />
-          <ResultSection title="system error log" value={submission.systemErrorLog} />
+          <ResultSection title="error" value={submission.errorMessage} />
         </div>
       )}
     </Modal>
